@@ -1,16 +1,30 @@
 Bootstrap: docker
-From: ubuntu:18.04
+From: ubuntu:19.10
 
 %help
 
-    borgbackup 1.1.6
+    borgbackup 1.1.10
 
 %labels
 
     MAINTAINER "Tom Harrop (twharrop@gmail.com)"
-    VERSION "borgbackup 1.1.6"
+    VERSION "borgbackup 1.1.10"
 
 %post
+    # faster apt downloads
+    export DEBIAN_FRONTEND=noninteractive
+    (
+        . /etc/os-release
+        cat << _EOF_ > mirror.txt
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${UBUNTU_CODENAME} main restricted universe multiverse
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${UBUNTU_CODENAME}-updates main restricted universe multiverse
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${UBUNTU_CODENAME}-backports main restricted universe multiverse
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${UBUNTU_CODENAME}-security main restricted universe multiverse
+
+_EOF_
+        mv /etc/apt/sources.list /etc/apt/sources.list.bak
+        cat mirror.txt /etc/apt/sources.list.bak > /etc/apt/sources.list
+    )
 
     # install dependencies
     apt-get update
@@ -33,7 +47,7 @@ From: ubuntu:18.04
     # download borg
     wget -O "borg.tar.gz" \
         --no-check-certificate \
-        https://github.com/borgbackup/borg/releases/download/1.1.6/borgbackup-1.1.6.tar.gz
+https://github.com/borgbackup/borg/releases/download/1.1.10/borgbackup-1.1.10.tar.gz
     mkdir borg
     tar -zxf borg.tar.gz \
         -C borg \
